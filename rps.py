@@ -21,6 +21,10 @@ and reports both Player's scores each round."""
 
 moves = ['rock', 'paper', 'scissors']
 
+"""Number of rounds to play."""
+NUM_ROUNDS = 1
+
+
 """The Player class is the parent class for all of the Players
 in this game"""
 
@@ -82,21 +86,21 @@ class Reflect(Player):
 
 
 class Cycle(Player):
-    # Dunder method. Assigns the next move to the
-    # possible outcome of moves.
-    def __init__(self):
-        self.my_next_move_index = random.randrange(3)
 
-    # We use modulo to cycle through each move.
-    # We do not want to choose the same move twice.
+    def __init__(self):
+        self.move_index = 0
+        self.my_move = moves
 
     def move(self):
-        my_move = moves[self.my_next_move_index]
-        self.my_next_move_index = (self.my_next_move_index + 1) % 3
+        my_move = moves[self.move_index]
+        self.move_index = (self.move_index + 1) % len(self.my_move)
         return my_move
 
+    def learn(self, my_move, their_move):
+        pass
 
-"""This function tracks what moves beat the other!"""
+
+"""This function tracks what moves beat the other"""
 
 
 def beats(one, two):
@@ -155,7 +159,8 @@ class Game:
     def play_game(self):
         print(f"{Fore.RED}Welcome to Rock, Paper & Scissors\n"
               f"game!{Style.RESET_ALL}\n")
-        for round in range(3):
+        self.rounds = 3
+        for round in range(self.rounds):
             print(f"Round {round + 1}:")
             self.play_round()
         print("Game over!")
@@ -170,7 +175,7 @@ class Game:
         elif self.p1_score > self.p2_score:
             print(f"{Fore.RED}Player 1 wins the game!\n"
                   f"Final Score: {self.p1_score}{Style.RESET_ALL}\n"
-                  f"Play 2 Final Score: {self.p2_score}")
+                  f"Player 2 Final Score: {self.p2_score}")
         if self.p1_score < self.p2_score:
             print(f"{Fore.RED}Player 2 wins the game!\n"
                   f"Final Score: {self.p2_score}{Style.RESET_ALL}\n"
@@ -178,8 +183,48 @@ class Game:
                   f"{Style.RESET_ALL}")
 
 
+"""This block of code sets up the game with a human player and
+
+three rounds against random computer players. The game is played
+
+three times with different computer players each time."""
+
+
 if __name__ == '__main__':
+    # Initialize a Game object with a Human player and None as the opponent
     game = Game(Human(), None)
-    for i in range(3):
-        game.p2 = game.random_player()
+    while True:
+        # Ask the user to choose an opponent
+        print("Please choose your opponent:\n"
+              "1. Random Player\n"
+              "2. Reflect Player\n"
+              "3. Cycle Player\n")
+
+        player_choice = valid_input("Enter 1, 2 or 3: ", ["1", "2", "3"])
+
+        if player_choice == "1":
+            game.p2 = Random()
+            break
+        elif player_choice == "2":
+            game.p2 = Reflect()
+            break
+        elif player_choice == "3":
+            game.p2 = Cycle()
+            break
+        else:
+            print("Invalid input. Please try again.")
+            continue
+
+    # Play rounds of the game
+    for play in range(NUM_ROUNDS):
+        # Play the game
         game.play_game()
+
+        # Ask the user if they want to play again
+        play_again = valid_input("Would you like to play again? (y/n): ",
+                                 ["y", "n"])
+        if play_again == "y":
+            game.play_game()
+        else:
+            print("Thanks for playing!")
+            break
